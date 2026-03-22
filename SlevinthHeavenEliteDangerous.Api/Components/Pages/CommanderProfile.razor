@@ -1,0 +1,549 @@
+@page "/commander/{FID}"
+@page "/commander/me"
+@using SlevinthHeavenEliteDangerous.Api.Models
+@using SlevinthHeavenEliteDangerous.Api.Storage
+@inject CommanderDataStore Store
+@inject NavigationManager Nav
+
+<PageTitle>@(_profile?.CommanderName ?? "Commander") — Slevinth Heaven</PageTitle>
+
+@if (_profile is null)
+{
+    <p class="loading">@(_errorMessage ?? "Loading…")</p>
+}
+else
+{
+    <div class="page-header">
+        <h1>CMDR @_profile.CommanderName</h1>
+        @if (_profile.IsOwnProfile)
+        {
+            <span class="badge badge-own">Your Profile</span>
+        }
+        @if (_profile.IsOwnProfile && !string.IsNullOrEmpty(_profile.CurrentSystem))
+        {
+            <p class="subtitle">
+                Currently in <strong>@_profile.CurrentSystem</strong>
+                @if (!string.IsNullOrEmpty(_profile.CurrentStation))
+                {
+                    <text> — docked at <strong>@_profile.CurrentStation</strong></text>
+                }
+            </p>
+        }
+    </div>
+
+    @* ---- Ranks ---- *@
+    <section class="card-section">
+        <h2>Ranks</h2>
+        <div class="stat-grid">
+            @foreach (var rank in _profile.Ranks)
+            {
+                <div class="stat-card">
+                    <div class="stat-label">@rank.RankType</div>
+                    <div class="stat-value">@rank.RankName</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: @(rank.Progress)%"></div>
+                    </div>
+                    <div class="stat-sub">@rank.Progress% to next</div>
+                </div>
+            }
+        </div>
+    </section>
+
+    @* ---- Reputation ---- *@
+    <section class="card-section">
+        <h2>Reputation</h2>
+        <div class="stat-grid four-col">
+            <div class="stat-card">
+                <div class="stat-label">Empire</div>
+                <div class="stat-value @RepClass(_profile.Reputation.Empire)">@_profile.Reputation.Empire.ToString("F1")%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Federation</div>
+                <div class="stat-value @RepClass(_profile.Reputation.Federation)">@_profile.Reputation.Federation.ToString("F1")%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Alliance</div>
+                <div class="stat-value @RepClass(_profile.Reputation.Alliance)">@_profile.Reputation.Alliance.ToString("F1")%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Independent</div>
+                <div class="stat-value @RepClass(_profile.Reputation.Independent)">@_profile.Reputation.Independent.ToString("F1")%</div>
+            </div>
+        </div>
+    </section>
+
+    @* ---- Stats ---- *@
+    <section class="card-section">
+        <h2>Statistics</h2>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-label">Current Wealth</div>
+                <div class="stat-value">@_profile.Stats.CurrentWealth.ToString("N0") CR</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Ships Owned</div>
+                <div class="stat-value">@_profile.Stats.OwnedShipCount</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Systems Visited</div>
+                <div class="stat-value">@_profile.Stats.SystemsVisited.ToString("N0")</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Hyperspace Jumps</div>
+                <div class="stat-value">@_profile.Stats.TotalHyperspaceJumps.ToString("N0")</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Distance Travelled</div>
+                <div class="stat-value">@_profile.Stats.TotalHyperspaceDistance.ToString("N1") ly</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Time Played</div>
+                <div class="stat-value">@FormatTimePlayed(_profile.Stats.TimePlayed)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Exploration Profits</div>
+                <div class="stat-value">@_profile.Stats.ExplorationProfits.ToString("N0") CR</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Trade Profits</div>
+                <div class="stat-value">@_profile.Stats.MarketProfits.ToString("N0") CR</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Mining Profits</div>
+                <div class="stat-value">@_profile.Stats.MiningProfits.ToString("N0") CR</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">ExoBiology Profits</div>
+                <div class="stat-value">@_profile.Stats.ExobiologyProfits.ToString("N0") CR</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Bounties Claimed @VisIcon(_profile.IsOwnProfile)</div>
+                <div class="stat-value">@(_profile.IsOwnProfile ? _profile.Stats.BountiesClaimed.ToString("N0") : "—")</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Bounty Profits @VisIcon(_profile.IsOwnProfile)</div>
+                <div class="stat-value">@(_profile.IsOwnProfile ? $"{_profile.Stats.BountyHuntingProfit:N0} CR" : "—")</div>
+            </div>
+        </div>
+    </section>
+
+    @* ---- Visited Systems ---- *@
+    <section class="card-section">
+        <h2>
+            Visited Systems
+            <span class="count">(@_profile.VisitedSystems.Count)</span>
+        </h2>
+        @if (!_profile.IsOwnProfile)
+        {
+            <p class="visibility-note">Only discovered systems are visible.</p>
+        }
+        @if (_profile.VisitedSystems.Count == 0)
+        {
+            <p class="empty-state">No visited systems to display.</p>
+        }
+        else
+        {
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>System</th>
+                            <th>Bodies</th>
+                            <th>Discovered</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var sys in _profile.VisitedSystems
+                            .Skip((_sysCurrentPage - 1) * SystemsPageSize)
+                            .Take(SystemsPageSize))
+                        {
+                            <tr>
+                                <td>@sys.StarSystem</td>
+                                <td>@sys.Bodies.Count</td>
+                                <td>@(sys.Discovered ? "✓" : "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (_sysTotalPages > 1)
+            {
+                <nav class="pagination">
+                    @if (_sysCurrentPage > 1)
+                    {
+                        <a href="@PageUrl("sysPage", _sysCurrentPage - 1)" class="page-link">← Previous</a>
+                    }
+                    <span class="page-info">Page @_sysCurrentPage of @_sysTotalPages</span>
+                    @if (_sysCurrentPage < _sysTotalPages)
+                    {
+                        <a href="@PageUrl("sysPage", _sysCurrentPage + 1)" class="page-link">Next →</a>
+                    }
+                </nav>
+            }
+        }
+    </section>
+
+    @* ---- Codex ---- *@
+    @if (_profile.CodexEntries.Count > 0)
+    {
+        <section class="card-section">
+            <h2>
+                Codex Discoveries
+                <span class="count">(@_profile.CodexEntries.Count)</span>
+            </h2>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Region</th>
+                            <th>System @VisIcon(_profile.IsOwnProfile)</th>
+                            <th>Date @VisIcon(_profile.IsOwnProfile)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in _profile.CodexEntries
+                            .Skip((_codexCurrentPage - 1) * CodexPageSize)
+                            .Take(CodexPageSize))
+                        {
+                            <tr>
+                                <td>@entry.Name</td>
+                                <td>@entry.SubCategory</td>
+                                <td>@entry.Region</td>
+                                <td>@(_profile.IsOwnProfile ? entry.System : "—")</td>
+                                <td>@(_profile.IsOwnProfile && entry.Timestamp != default ? entry.Timestamp.ToString("dd MMM yyyy") : "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (_codexTotalPages > 1)
+            {
+                <nav class="pagination">
+                    @if (_codexCurrentPage > 1)
+                    {
+                        <a href="@PageUrl("codexPage", _codexCurrentPage - 1)" class="page-link">← Previous</a>
+                    }
+                    <span class="page-info">Page @_codexCurrentPage of @_codexTotalPages</span>
+                    @if (_codexCurrentPage < _codexTotalPages)
+                    {
+                        <a href="@PageUrl("codexPage", _codexCurrentPage + 1)" class="page-link">Next →</a>
+                    }
+                </nav>
+            }
+        </section>
+    }
+
+    @* ---- ExoBio Sales ---- *@
+    @if (_profile.ExoBioSales.Count > 0)
+    {
+        <section class="card-section">
+            <h2>
+                ExoBiology Sales
+                <span class="count">Total: @_profile.ExoBioTotalEarnings.ToString("N0") CR</span>
+            </h2>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>System @VisIcon(_profile.IsOwnProfile)</th>
+                            <th>Station @VisIcon(_profile.IsOwnProfile)</th>
+                            <th>Species</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in _bioRows
+                            .Skip((_bioCurrentPage - 1) * ExoBioPageSize)
+                            .Take(ExoBioPageSize))
+                        {
+                            <tr>
+                                <td>@row.Sale.SaleTimestamp.ToString("dd MMM yyyy")</td>
+                                <td>@(_profile.IsOwnProfile ? row.Sale.SystemName : "—")</td>
+                                <td>@(_profile.IsOwnProfile ? row.Sale.StationName : "—")</td>
+                                <td>@row.Item.Species_Localised</td>
+                                <td>@((row.Item.Value + row.Item.Bonus).ToString("N0")) CR</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (_bioTotalPages > 1)
+            {
+                <nav class="pagination">
+                    @if (_bioCurrentPage > 1)
+                    {
+                        <a href="@PageUrl("bioPage", _bioCurrentPage - 1)" class="page-link">← Previous</a>
+                    }
+                    <span class="page-info">Page @_bioCurrentPage of @_bioTotalPages</span>
+                    @if (_bioCurrentPage < _bioTotalPages)
+                    {
+                        <a href="@PageUrl("bioPage", _bioCurrentPage + 1)" class="page-link">Next →</a>
+                    }
+                </nav>
+            }
+        </section>
+    }
+}
+
+@code {
+    private const int SystemsPageSize = 20;
+    private const int CodexPageSize = 20;
+    private const int ExoBioPageSize = 20;
+
+    [Parameter]
+    public string? FID { get; set; }
+
+    [SupplyParameterFromQuery(Name = "sysPage")]
+    public int? SysPage { get; set; }
+
+    [SupplyParameterFromQuery(Name = "codexPage")]
+    public int? CodexPage { get; set; }
+
+    [SupplyParameterFromQuery(Name = "bioPage")]
+    public int? BioPage { get; set; }
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private CommanderProfileDto? _profile;
+    private string? _errorMessage;
+    private int _sysCurrentPage;
+    private int _sysTotalPages;
+    private int _codexCurrentPage;
+    private int _codexTotalPages;
+    private int _bioCurrentPage;
+    private int _bioTotalPages;
+    private List<(ExoBioSaleDto Sale, BioSaleItemDto Item)> _bioRows = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var callerName = HttpContext?.User?.Identity?.IsAuthenticated == true
+            ? HttpContext.User.Identity?.Name
+            : null;
+
+        // "/commander/me" route
+        if (string.Equals(FID, "me", StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(FID))
+        {
+            if (string.IsNullOrEmpty(callerName))
+            {
+                Nav.NavigateTo("/auth/login", forceLoad: true);
+                return;
+            }
+
+            var all = await Store.GetAllAsync();
+            var mine = all.FirstOrDefault(d =>
+                string.Equals(d.CommanderName, callerName, StringComparison.OrdinalIgnoreCase));
+
+            if (mine is null)
+            {
+                _errorMessage = "No journal data uploaded yet. Open the Slevinth Heaven desktop app to start uploading.";
+                return;
+            }
+
+                _profile = BuildDto(mine, isOwner: true);
+                    ComputePagination();
+                    return;
+                }
+
+                // "/commander/{FID}" route
+                var data = await Store.GetAsync(FID);
+                if (data is null)
+                {
+                    _errorMessage = "Commander not found.";
+                    return;
+                }
+
+                var isOwner = !string.IsNullOrEmpty(callerName) &&
+                              string.Equals(data.CommanderName, callerName, StringComparison.OrdinalIgnoreCase);
+
+                _profile = BuildDto(data, isOwner);
+                ComputePagination();
+            }
+
+            private void ComputePagination()
+            {
+                if (_profile is null) return;
+
+                _sysTotalPages = Math.Max(1, (int)Math.Ceiling(_profile.VisitedSystems.Count / (double)SystemsPageSize));
+                _sysCurrentPage = Math.Clamp(SysPage ?? 1, 1, _sysTotalPages);
+
+                _codexTotalPages = Math.Max(1, (int)Math.Ceiling(_profile.CodexEntries.Count / (double)CodexPageSize));
+                _codexCurrentPage = Math.Clamp(CodexPage ?? 1, 1, _codexTotalPages);
+
+                // Flatten ExoBio sales into individual species rows for accurate pagination
+                _bioRows = _profile.ExoBioSales
+                    .SelectMany(sale => sale.Items.Select(item => (sale, item)))
+                    .ToList();
+
+                _bioTotalPages = Math.Max(1, (int)Math.Ceiling(_bioRows.Count / (double)ExoBioPageSize));
+                _bioCurrentPage = Math.Clamp(BioPage ?? 1, 1, _bioTotalPages);
+            }
+
+            private string PageUrl(string param, int page)
+            {
+                var path = string.Equals(FID, "me", StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(FID)
+                    ? "/commander/me" : $"/commander/{FID}";
+
+                var queryParams = new Dictionary<string, int>();
+
+                // Preserve current page values for other sections
+                if (_sysCurrentPage > 1) queryParams["sysPage"] = _sysCurrentPage;
+                if (_codexCurrentPage > 1) queryParams["codexPage"] = _codexCurrentPage;
+                if (_bioCurrentPage > 1) queryParams["bioPage"] = _bioCurrentPage;
+
+                // Override the target param
+                if (page > 1)
+                    queryParams[param] = page;
+                else
+                    queryParams.Remove(param);
+
+                if (queryParams.Count == 0)
+                    return path;
+
+                return path + "?" + string.Join("&", queryParams.Select(kv => $"{kv.Key}={kv.Value}"));
+            }
+
+    // --- DTO builder mirrors CommanderController logic ---
+
+    private static readonly string[] RankTypeList =
+        ["Combat", "Trade", "Explore", "Soldier", "Exobiologist", "Empire", "Federation", "CQC"];
+
+    private static readonly Dictionary<string, string[]> RankNameLookup = new()
+    {
+        ["Combat"] = ["Harmless", "Mostly Harmless", "Novice", "Competent", "Expert", "Master", "Dangerous", "Deadly", "Elite"],
+        ["Trade"] = ["Penniless", "Mostly Penniless", "Peddler", "Dealer", "Merchant", "Broker", "Entrepreneur", "Tycoon", "Elite"],
+        ["Explore"] = ["Aimless", "Mostly Aimless", "Scout", "Surveyor", "Trailblazer", "Pathfinder", "Ranger", "Pioneer", "Elite"],
+        ["Soldier"] = ["Defenceless", "Mostly Defenceless", "Rookie", "Soldier", "Gunslinger", "Warrior", "Gladiator", "Deadeye", "Elite"],
+        ["Exobiologist"] = ["Directionless", "Mostly Directionless", "Compiler", "Collector", "Cataloguer", "Taxonomist", "Ecologist", "Geneticist", "Elite"],
+        ["Empire"] = ["None", "Outsider", "Serf", "Master", "Squire", "Knight", "Lord", "Baron", "Viscount", "Count", "Earl", "Marquis", "Duke", "Prince", "King"],
+        ["Federation"] = ["None", "Recruit", "Cadet", "Midshipman", "Petty Officer", "Chief Petty Officer", "Warrant Officer", "Ensign", "Lieutenant", "Lieutenant Commander", "Post Commander", "Post Captain", "Rear Admiral", "Vice Admiral", "Admiral"],
+        ["CQC"] = ["Helpless", "Mostly Helpless", "Amateur", "Semi Professional", "Professional", "Champion", "Hero", "Legend", "Elite"],
+    };
+
+    private static CommanderProfileDto BuildDto(ServerCommanderData data, bool isOwner)
+    {
+        var dto = new CommanderProfileDto
+        {
+            FID = data.FID,
+            CommanderName = data.CommanderName,
+            IsOwnProfile = isOwner,
+            LastUpdated = data.LastUploadTimestamp,
+            Ranks = RankTypeList.Select(rt => new RankDto
+            {
+                RankType = rt,
+                RankValue = data.Ranks.TryGetValue(rt, out var v) ? v : 0,
+                Progress = data.RankProgress.TryGetValue(rt, out var p) ? p : 0,
+                RankName = GetRankName(rt, data.Ranks.TryGetValue(rt, out var rv) ? rv : 0),
+            }).ToList(),
+            Reputation = new ReputationDto
+            {
+                Empire = data.EmpireReputation,
+                Federation = data.FederationReputation,
+                Independent = data.IndependentReputation,
+                Alliance = data.AllianceReputation,
+            },
+            Stats = new CommanderStatsDto
+            {
+                CurrentWealth = data.Stats.CurrentWealth,
+                OwnedShipCount = data.Stats.OwnedShipCount,
+                SystemsVisited = data.Stats.SystemsVisited,
+                ExplorationProfits = data.Stats.ExplorationProfits,
+                TotalHyperspaceJumps = data.Stats.TotalHyperspaceJumps,
+                TotalHyperspaceDistance = data.Stats.TotalHyperspaceDistance,
+                TimePlayed = data.Stats.TimePlayed,
+                MarketProfits = data.Stats.MarketProfits,
+                MarketsTradedWith = data.Stats.MarketsTradedWith,
+                BountiesClaimed = isOwner ? data.Stats.BountiesClaimed : 0,
+                BountyHuntingProfit = isOwner ? data.Stats.BountyHuntingProfit : 0,
+                MiningProfits = data.Stats.MiningProfits,
+                ExobiologyProfits = data.Stats.ExobiologyProfits,
+                OrganicSpeciesEncountered = data.Stats.OrganicSpeciesEncountered,
+            },
+            CodexEntries = data.CodexEntries.Values.Select(c => new CodexEntryDto
+            {
+                EntryID = c.EntryID, Name = c.Name, Category = c.Category,
+                SubCategory = c.SubCategory, Region = c.Region,
+                System = isOwner ? c.System : string.Empty,
+                Timestamp = isOwner ? c.Timestamp : default,
+            }).OrderByDescending(c => c.Timestamp).ToList(),
+            ExoBioSales = data.ExoBioSales.Select(s => new ExoBioSaleDto
+            {
+                SaleTimestamp = s.SaleTimestamp,
+                SystemName = isOwner ? s.SystemName : string.Empty,
+                StationName = isOwner ? s.StationName : string.Empty,
+                TotalValue = s.TotalValue,
+                Items = s.Items.Select(i => new BioSaleItemDto
+                {
+                    Species = i.Species, Species_Localised = i.SpeciesLocalised,
+                    Value = i.Value, Bonus = i.Bonus,
+                }).ToList(),
+            }).OrderByDescending(s => s.SaleTimestamp).ToList(),
+            ExoBioTotalEarnings = data.ExoBioTotalEarnings,
+        };
+
+        if (isOwner)
+        {
+            dto.VisitedSystems = data.VisitedSystems.Values
+                .Select(MapSystem)
+                .OrderBy(s => s.Discovered)
+                .ThenBy(s => s.StarSystem)
+                .ToList();
+            dto.CurrentSystem = data.CurrentSystem;
+            dto.CurrentStation = data.CurrentStation;
+        }
+        else
+        {
+            // Others see systems where nav data has been sold or first discoveries were made
+            dto.VisitedSystems = data.VisitedSystems.Values
+                .Where(s => s.NavDataSold || s.Population > 0 || s.Bodies.Any(b => b.WasDiscovered))
+                .Select(MapSystem)
+                .OrderBy(s => s.StarSystem)
+                .ToList();
+        }
+
+        return dto;
+    }
+
+    private static VisitedSystemDto MapSystem(ServerVisitedSystem s) => new()
+    {
+        SystemAddress = s.SystemAddress, StarSystem = s.StarSystem, StarPos = s.StarPos,
+        Discovered = s.NavDataSold || s.Population > 0 || s.Bodies.Any(b => b.WasDiscovered),
+        Bodies = s.Bodies.Select(b => new BodyDto
+        {
+            BodyName = b.BodyName, BodyID = b.BodyID, PlanetClass = b.PlanetClass,
+            TerraformState = b.TerraformState, WasDiscovered = b.WasDiscovered,
+            WasMapped = b.WasMapped, Landable = b.Landable,
+            DistanceFromArrivalLS = b.DistanceFromArrivalLS,
+        }).ToList(),
+    };
+
+    private static string GetRankName(string rankType, int value)
+    {
+        if (RankNameLookup.TryGetValue(rankType, out var names) && value >= 0 && value < names.Length)
+            return names[value];
+        return "Unknown";
+    }
+
+    private static string FormatTimePlayed(long seconds)
+    {
+        var ts = TimeSpan.FromSeconds(seconds);
+        return ts.TotalHours >= 1
+            ? $"{(int)ts.TotalHours:N0}h {ts.Minutes}m"
+            : $"{ts.Minutes}m";
+    }
+
+    private static string RepClass(double value) => value >= 0 ? "positive" : "negative";
+
+    /// <summary>
+    /// Returns an eye (visible) or crossed-out eye (hidden) icon
+    /// to indicate whether a value is visible to other commanders.
+    /// </summary>
+    private static MarkupString VisIcon(bool isOwner) => new(
+        isOwner
+            ? "<span class=\"vis-icon vis-visible\" title=\"Visible to other commanders\">👁</span>"
+            : "<span class=\"vis-icon vis-hidden\" title=\"Hidden from other commanders\">🚫</span>"
+    );
+}

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      LibUsbDotNet requires a WinUSB or LibUSB-win32 driver installed for the target device.
+      Use Zadig (https://zadig.akeo.ie/) to install WinUSB for VID_ABCD PID_1234 before first use.
+    -->
+    <PackageReference Include="LibUsbDotNet" Version="2.2.29" />
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="2.88.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SlevinthHeavenEliteDangerous.Core\SlevinthHeavenEliteDangerous.Core.csproj" />
+  </ItemGroup>
+
+</Project>

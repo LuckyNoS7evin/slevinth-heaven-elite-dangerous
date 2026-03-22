@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="SlevinthHeavenEliteDangerous.Controls.FSDTimingCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SlevinthHeavenEliteDangerous.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+            BorderThickness="1" 
+            CornerRadius="8" 
+            Padding="16" 
+            Margin="12">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Avg Time Between All Jumps -->
+            <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Text="Avg Time (All Jumps)" 
+                           FontSize="12" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <TextBlock Text="{Binding AvgTimeAllJumpsFormatted, Mode=OneWay}" 
+                           FontSize="20" 
+                           FontWeight="SemiBold"/>
+            </StackPanel>
+
+            <!-- Avg Time Between Fast Jumps -->
+            <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock Text="Avg Time (Fast Jumps)" 
+                           FontSize="12" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <TextBlock Text="{Binding AvgTimeFastJumpsFormatted, Mode=OneWay}" 
+                           FontSize="20" 
+                           FontWeight="SemiBold"
+                           Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
+            </StackPanel>
+
+            <!-- Total Jumps -->
+            <StackPanel Grid.Column="2" Spacing="4">
+                <TextBlock Text="Total Jumps" 
+                           FontSize="12" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <TextBlock Text="{Binding TotalJumps, Mode=OneWay}" 
+                           FontSize="20" 
+                           FontWeight="SemiBold"
+                           Foreground="{ThemeResource SystemFillColorCautionBrush}"/>
+            </StackPanel>
+
+            <!-- Fast Jumps Count -->
+            <StackPanel Grid.Column="3" Spacing="4">
+                <TextBlock Text="Fast Jumps (&lt;2min)" 
+                           FontSize="12" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <TextBlock Text="{Binding FastJumpsCount, Mode=OneWay}" 
+                           FontSize="20" 
+                           FontWeight="SemiBold"
+                           Foreground="{ThemeResource AccentFillColorDefaultBrush}"/>
+            </StackPanel>
+
+            <!-- Shortest Time Between Jumps -->
+            <StackPanel Grid.Column="4" Spacing="4">
+                <TextBlock Text="Shortest Time" 
+                           FontSize="12" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <TextBlock Text="{Binding ShortestTimeFormatted, Mode=OneWay}" 
+                           FontSize="20" 
+                           FontWeight="SemiBold"
+                           Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</UserControl>

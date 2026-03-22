@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SlevinthHeavenEliteDangerous (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SlevinthHeavenEliteDangerous (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

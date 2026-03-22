@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="SlevinthHeavenEliteDangerous.Controls.VisitedSystemsList"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewmodels="using:SlevinthHeavenEliteDangerous.ViewModels"
+    xmlns:converters="using:SlevinthHeavenEliteDangerous.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+     <UserControl.Resources>
+     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+     <converters:TerraformToVisibilityConverter x:Key="TerraformToVisibilityConverter"/>
+     <converters:TextToColourConverter x:Key="TextToColourConverter"/>
+
+     <!-- Hierarchical Body Template -->
+     <DataTemplate x:Key="BodyHierarchyTemplate" x:DataType="viewmodels:BodyCardViewModel">
+         <StackPanel Margin="0,4">
+             <!-- Body Card -->
+             <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}" 
+                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                     BorderThickness="1" 
+                     CornerRadius="4" 
+                     Padding="12"
+                     Margin="0,0,0,4">
+
+                 <StackPanel>
+                     <Grid>
+                         <Grid.ColumnDefinitions>
+                             <ColumnDefinition Width="*"/>
+                             <ColumnDefinition Width="*"/>
+                             <ColumnDefinition Width="*"/>
+                             <ColumnDefinition Width="*"/>
+                             <ColumnDefinition Width="Auto"/>
+                         </Grid.ColumnDefinitions>
+
+                         <!-- Body Name -->
+                         <StackPanel Grid.Column="0" Spacing="2">
+                             <TextBlock Text="Body Name" 
+   FontSize="10" 
+   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                             <TextBlock Text="{x:Bind BodyName, Mode=OneWay}" 
+   FontSize="14" 
+   FontWeight="SemiBold"/>
+                         </StackPanel>
+
+
+                         <!-- Planet Class -->
+                         <StackPanel Grid.Column="1" Spacing="2">
+                             <TextBlock Text="Planet Class" 
+   FontSize="10" 
+   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                             <TextBlock Text="{x:Bind PlanetClass, Mode=OneWay}" 
+   FontSize="14" 
+   FontWeight="SemiBold"/>
+                         </StackPanel>
+
+                         <!-- Discovery Status -->
+                         <StackPanel Grid.Column="2" Spacing="2">
+                             <TextBlock Text="Distance from Entry" 
+   FontSize="10" 
+   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                             <TextBlock Text="{x:Bind DistanceFromArrivalFormatted, Mode=OneWay}" 
+   FontSize="14" 
+   FontWeight="SemiBold"/>
+                         </StackPanel>
+
+                         <!-- Discovery Status -->
+                         <StackPanel Grid.Column="3" Spacing="2">
+                             <TextBlock Text="Discovery Status" 
+   FontSize="10" 
+   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                             <TextBlock Text="{x:Bind DiscoveryStatus, Mode=OneWay}" 
+   FontSize="14" 
+   FontWeight="SemiBold"
+   Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
+                         </StackPanel>
+
+                     </Grid>
+
+                     <!-- Signals Row -->
+                     <Grid>
+                         <Grid.ColumnDefinitions>
+                             <ColumnDefinition Width="*"/>
+                             <ColumnDefinition Width="Auto"/>
+                             <ColumnDefinition Width="Auto"/>
+                             <ColumnDefinition Width="Auto"/>
+                         </Grid.ColumnDefinitions>
+
+                         <!-- Body ID -->
+                         <StackPanel Grid.Column="0" Spacing="2">
+                             <TextBlock Text="Signals" 
+   FontSize="10" 
+   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                             <TextBlock Text="{x:Bind SignalsFormatted, Mode=OneWay}" 
+   FontSize="14" 
+   FontWeight="SemiBold"
+   Foreground="{x:Bind SignalsFormatted, Mode=OneWay, Converter={StaticResource TextToColourConverter}}"
+   FontFamily="Consolas"/>
+                         </StackPanel>
+
+                         <!-- Landable Badge -->
+                         <Border Grid.Column="1"
+Background="{ThemeResource SystemFillColorSuccessBrush}"
+CornerRadius="4"
+Padding="8,4"
+Margin="8,0,0,0"
+VerticalAlignment="Center"
+Visibility="{x:Bind Landable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                             <TextBlock Text="LANDABLE"
+       FontSize="10"
+       FontWeight="SemiBold"
+       Foreground="White"/>
+                         </Border>
+
+                         <!-- Mapped Badge -->
+                         <Border Grid.Column="2"
+Background="{ThemeResource SystemFillColorCautionBrush}"
+CornerRadius="4"
+Padding="8,4"
+Margin="4,0,0,0"
+VerticalAlignment="Center"
+Visibility="{x:Bind Mapped, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                             <TextBlock Text="MAPPED"
+       FontSize="10"
+       FontWeight="SemiBold"
+       Foreground="White"/>
+                         </Border>
+
+                         <!-- TerraformState Badge -->
+                         <Border Grid.Column="3"
+Background="{ThemeResource AccentFillColorDefaultBrush}"
+CornerRadius="4"
+Padding="8,4"
+Margin="4,0,0,0"
+VerticalAlignment="Center"
+Visibility="{x:Bind TerraformState, Mode=OneWay, Converter={StaticResource TerraformToVisibilityConverter}}">
+                             <TextBlock Text="TERAFORMABLE"
+       FontSize="10"
+       FontWeight="SemiBold"
+       Foreground="White"/>
+                         </Border>
+
+                     </Grid>
+                 </StackPanel>
+             </Border>
+
+             <!-- Children (Recursive) -->
+             <ItemsControl ItemsSource="{x:Bind Children, Mode=OneWay}"
+                           Margin="40,0,0,0"
+                           Visibility="{x:Bind HasChildren, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                 <ItemsControl.ItemTemplate>
+                     <StaticResource ResourceKey="BodyHierarchyTemplate"/>
+                 </ItemsControl.ItemTemplate>
+             </ItemsControl>
+         </StackPanel>
+     </DataTemplate>
+ </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel Spacing="8" Padding="12">
+            <TextBlock Text="Visited Systems" 
+                       FontSize="20" 
+                       FontWeight="SemiBold" 
+                       Margin="0,0,0,8"/>
+
+            <ItemsControl ItemsSource="{Binding VisitedSystems, Mode=OneWay}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="viewmodels:VisitedSystemCardViewModel">
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
+                                BorderThickness="1" 
+                                CornerRadius="8" 
+                                Padding="16" 
+                                Margin="0,0,0,8">
+                            <StackPanel Spacing="8">
+                                <!-- System Header - will be moved to separate file later -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Star System Name -->
+                                    <StackPanel Grid.Column="0" Spacing="4">
+                                        <TextBlock Text="Star System" 
+                                               FontSize="12" 
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Text="{x:Bind StarSystem, Mode=OneWay}" 
+                                               FontSize="16" 
+                                               FontWeight="SemiBold"/>
+                                    </StackPanel>
+
+                                    <!-- System Address -->
+                                    <StackPanel Grid.Column="1" Spacing="4">
+                                        <TextBlock Text="System Address" 
+                                               FontSize="12" 
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Text="{x:Bind SystemAddress, Mode=OneWay}" 
+                                               FontSize="16" 
+                                               FontWeight="SemiBold"
+                                               FontFamily="Consolas"/>
+                                    </StackPanel>
+
+                                    <!-- Distance from Sol -->
+                                    <StackPanel Grid.Column="2" Spacing="4">
+                                        <TextBlock Text="Distance" 
+                                               FontSize="12" 
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Text="{x:Bind DistanceFromSolFormatted, Mode=OneWay}" 
+                                               FontSize="16" 
+                                               FontWeight="SemiBold"
+                                               FontFamily="Consolas"/>
+                                    </StackPanel>
+
+                                    <!-- First Visit -->
+                                    <StackPanel Grid.Column="3" Spacing="4">
+                                        <TextBlock Text="First Visit" 
+                                               FontSize="12" 
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Text="{x:Bind FirstVisitFormatted, Mode=OneWay}" 
+                                               FontSize="16" 
+                                               FontWeight="SemiBold"
+                                               FontFamily="Consolas"/>
+                                    </StackPanel>
+
+                                    <!-- Last Visit -->
+                                    <StackPanel Grid.Column="4" Spacing="4">
+                                        <TextBlock Text="Last Visit" 
+                                               FontSize="12" 
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Text="{x:Bind LastVisitFormatted, Mode=OneWay}" 
+                                               FontSize="16" 
+                                               FontWeight="SemiBold"
+                                               FontFamily="Consolas"
+                                               Foreground="{ThemeResource AccentFillColorDefaultBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Expandable Bodies Section -->
+                                <Expander Header="Scanned Bodies" 
+                                          HorizontalAlignment="Stretch"
+                                          HorizontalContentAlignment="Stretch"
+                                          Visibility="{Binding HasBodies, Converter={StaticResource BoolToVisibilityConverter}}"
+                                          Padding="0,12,0,8">
+                                    <!-- Use hierarchical template for bodies -->
+                                    <ItemsControl ItemsSource="{x:Bind Bodies, Mode=OneWay}" 
+                                                  ItemTemplate="{StaticResource BodyHierarchyTemplate}"
+                                                  Margin="0,0,0,0" 
+                                                  HorizontalAlignment="Stretch"
+                                                  HorizontalContentAlignment="Stretch"/>
+                                </Expander>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

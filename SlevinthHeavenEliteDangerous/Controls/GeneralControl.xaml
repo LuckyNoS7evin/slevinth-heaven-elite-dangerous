@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="SlevinthHeavenEliteDangerous.Controls.GeneralControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SlevinthHeavenEliteDangerous.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+        <StackPanel Spacing="8">
+            <!-- FSD Target Card (Full Width) -->
+            <local:FSDTargetCard x:Name="FSDTargetCard" />
+
+            <!-- FSD Timing Card (Full Width) -->
+            <local:FSDTimingCard x:Name="FSDTimingCard" />
+
+            <!-- 50/50 Split: Ranks and Commander Stats -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Left: Ranks Control -->
+                <local:RanksControl x:Name="RanksControl" Grid.Column="0" Grid.Row="0"/>
+                
+                <!-- Faction Reputation -->
+                <local:ReputationControl x:Name="ReputationControl"  Grid.Column="0" Grid.Row="1"/>
+
+                <!-- Right: Commander Stats -->
+                <local:CommanderStatsControl x:Name="CommanderStatsControl" Grid.Column="1" Grid.Row="0 "/>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

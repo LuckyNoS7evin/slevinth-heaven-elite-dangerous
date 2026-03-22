@@ -1,0 +1,379 @@
+/* ========================================================================
+   Slevinth Heaven — Elite Dangerous themed dark UI
+   ======================================================================== */
+
+:root {
+    --bg-primary: #0a0a12;
+    --bg-secondary: #12121f;
+    --bg-card: #181828;
+    --border: #2a2a40;
+    --accent: #f07b05;
+    --accent-dim: #c06204;
+    --text-primary: #e8e8f0;
+    --text-secondary: #9090a8;
+    --text-muted: #606078;
+    --positive: #3bc43b;
+    --negative: #e04040;
+    --font-mono: 'Consolas', 'Courier New', monospace;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* ---- Layout ---- */
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.content {
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    width: 100%;
+}
+
+/* ---- Top Bar ---- */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+.brand:hover { text-decoration: none; }
+.brand-icon { font-size: 1.4rem; }
+
+.nav-links {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+}
+.nav-links a {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.nav-links a:hover {
+    color: var(--accent);
+    text-decoration: none;
+}
+.auth-link {
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+}
+.auth-link:hover {
+    background: var(--accent-dim);
+    color: #fff !important;
+}
+
+/* ---- Footer ---- */
+.footer {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ---- Page Header ---- */
+.page-header {
+    margin-bottom: 2rem;
+}
+.page-header h1 {
+    font-size: 1.8rem;
+    color: var(--accent);
+    display: inline;
+}
+.subtitle {
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* ---- Badges ---- */
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    vertical-align: middle;
+    margin-left: 0.75rem;
+}
+.badge-own {
+    background: var(--accent-dim);
+    color: #fff;
+}
+
+/* ---- Cards Grid (Commander List) ---- */
+.commander-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.commander-card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    transition: border-color 0.15s, transform 0.15s;
+}
+.commander-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+.cmdr-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+.cmdr-stats {
+    display: flex;
+    gap: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+.cmdr-meta {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* ---- Sections ---- */
+.card-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.card-section h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+.card-section h2 .count {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* ---- Stat Grid ---- */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+.stat-grid.four-col {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.85rem;
+}
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+}
+.stat-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+.stat-value.positive { color: var(--positive); }
+.stat-value.negative { color: var(--negative); }
+.stat-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* ---- Progress Bar ---- */
+.progress-bar {
+    height: 4px;
+    background: var(--bg-primary);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+.progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+}
+
+/* ---- Tables ---- */
+.table-wrapper {
+    overflow-x: auto;
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+.data-table th,
+.data-table td {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.data-table th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.data-table tbody tr:hover {
+    background: rgba(240, 123, 5, 0.05);
+}
+
+/* ---- Misc ---- */
+.loading {
+    color: var(--text-secondary);
+    padding: 2rem 0;
+}
+.empty-state {
+    color: var(--text-muted);
+    padding: 2rem 0;
+    text-align: center;
+}
+.visibility-note {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+.not-found {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+/* ---- Visibility Icons ---- */
+.vis-icon {
+    font-size: 0.8rem;
+    vertical-align: middle;
+    margin-left: 0.3rem;
+    cursor: help;
+}
+.vis-icon.vis-visible {
+    opacity: 0.6;
+}
+.vis-icon.vis-hidden {
+    opacity: 0.5;
+}
+
+/* ---- Pagination ---- */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+.pagination .page-link {
+    color: var(--accent);
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.pagination .page-link:hover {
+    background: var(--accent-dim);
+    color: var(--text-primary);
+}
+.pagination .page-info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ---- Download Link ---- */
+.download-link {
+    color: var(--accent) !important;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+.download-link:hover {
+    background: var(--accent-dim);
+    color: #fff !important;
+    text-decoration: none;
+}
+
+/* ---- Update Banner ---- */
+.update-banner {
+    background: #2a1800;
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent);
+    text-align: center;
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+}
+.update-banner a {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: underline;
+}
+.update-banner a:hover {
+    color: var(--accent);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .stat-grid.four-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .top-bar {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

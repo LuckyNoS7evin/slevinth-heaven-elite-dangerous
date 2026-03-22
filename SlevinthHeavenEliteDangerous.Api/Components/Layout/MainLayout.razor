@@ -1,0 +1,75 @@
+@inherits LayoutComponentBase
+@using SlevinthHeavenEliteDangerous.Api.Storage
+@inject CommanderDataStore Store
+@inject IConfiguration Config
+
+<div class="page">
+    @if (_isAppOutdated)
+    {
+        <div class="update-banner">
+            Your Slevinth Heaven app (v@_userAppVersion) is outdated —
+            <a href="/download/app">download v@Config["AppVersion"]</a> to continue syncing.
+        </div>
+    }
+
+    <header class="top-bar">
+        <a href="/" class="brand">
+            <span class="brand-icon">⬡</span>
+            <span class="brand-text">Slevinth Heaven</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Commanders</a>
+            @if (string.IsNullOrEmpty(UserName) || _isAppOutdated)
+            {
+                <a href="/download/app" class="download-link">Download App</a>
+            }
+            @if (!string.IsNullOrEmpty(UserName))
+            {
+                <a href="/commander/me">My Profile</a>
+                <a href="/auth/logout" class="auth-link">Logout (@UserName)</a>
+            }
+            else
+            {
+                <a href="/auth/login" class="auth-link">Login with Frontier</a>
+            }
+        </nav>
+    </header>
+
+    <main class="content">
+        @Body
+    </main>
+
+    <footer class="footer">
+        <span>Slevinth Heaven Elite Dangerous &copy; @DateTime.UtcNow.Year</span>
+    </footer>
+</div>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? UserName => HttpContext?.User?.Identity?.IsAuthenticated == true
+        ? HttpContext.User.Identity.Name
+        : null;
+
+    private string? _userAppVersion;
+    private bool _isAppOutdated;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (UserName is not null)
+        {
+            var all = await Store.GetAllAsync();
+            var mine = all.FirstOrDefault(d =>
+                string.Equals(d.CommanderName, UserName, StringComparison.OrdinalIgnoreCase));
+
+            _userAppVersion = mine?.LastAppVersion;
+            var latestVersion = Config["AppVersion"];
+
+            _isAppOutdated = !string.IsNullOrEmpty(_userAppVersion) &&
+                             !string.IsNullOrEmpty(latestVersion) &&
+                             _userAppVersion != latestVersion;
+        }
+    }
+}

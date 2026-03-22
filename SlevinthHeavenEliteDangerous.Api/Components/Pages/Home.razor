@@ -1,0 +1,50 @@
+@page "/"
+@using SlevinthHeavenEliteDangerous.Api.Storage
+@inject CommanderDataStore Store
+
+<PageTitle>Slevinth Heaven — Commanders</PageTitle>
+
+<div class="page-header">
+    <h1>Commanders</h1>
+    <p class="subtitle">All commanders who have uploaded journal data.</p>
+</div>
+
+@if (_commanders is null)
+{
+    <p class="loading">Loading…</p>
+}
+else if (_commanders.Count == 0)
+{
+    <div class="empty-state">
+        <p>No commander data uploaded yet.</p>
+        <p>Open the Slevinth Heaven desktop app and connect with Frontier to start uploading journal data.</p>
+    </div>
+}
+else
+{
+    <div class="commander-grid">
+        @foreach (var cmdr in _commanders)
+        {
+            <a href="/commander/@cmdr.FID" class="commander-card">
+                <div class="cmdr-name">CMDR @cmdr.CommanderName</div>
+                <div class="cmdr-stats">
+                    <span>Systems: @cmdr.Stats.SystemsVisited.ToString("N0")</span>
+                    <span>Jumps: @cmdr.Stats.TotalHyperspaceJumps.ToString("N0")</span>
+                </div>
+                <div class="cmdr-meta">
+                    Last updated: @cmdr.LastUploadTimestamp.ToString("dd MMM yyyy HH:mm") UTC
+                </div>
+            </a>
+        }
+    </div>
+}
+
+@code {
+    private List<SlevinthHeavenEliteDangerous.Api.Models.ServerCommanderData>? _commanders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _commanders = await Store.GetAllAsync();
+        _commanders = _commanders.OrderBy(c => c.CommanderName).ToList();
+    }
+}

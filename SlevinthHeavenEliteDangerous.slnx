@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="SlevinthHeavenEliteDangerous.Api/SlevinthHeavenEliteDangerous.Api.csproj" Id="90890d7a-b7c5-426b-ab00-c5135b5a7bd3" />
+  <Project Path="SlevinthHeavenEliteDangerous.Core/SlevinthHeavenEliteDangerous.Core.csproj" Id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" />
+  <Project Path="SlevinthHeavenEliteDangerous.Eddn/SlevinthHeavenEliteDangerous.Eddn.csproj" />
+  <Project Path="SlevinthHeavenEliteDangerous.VoCore/SlevinthHeavenEliteDangerous.VoCore.csproj" />
+  <Project Path="SlevinthHeavenEliteDangerous/SlevinthHeavenEliteDangerous.csproj">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Deploy />
+  </Project>
+</Solution>
