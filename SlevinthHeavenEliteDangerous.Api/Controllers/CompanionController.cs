@@ -36,6 +36,16 @@ public class CompanionController(
         if (string.IsNullOrWhiteSpace(fid))
             return BadRequest("FID is required.");
 
+        var authedFid = HttpContext.Items["CommanderFid"] as string;
+        if (!string.IsNullOrEmpty(authedFid) &&
+            !string.Equals(authedFid, fid, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning(
+                "[Companion] FID mismatch: token belongs to {AuthedFid} but upload claimed {SubmittedFid}",
+                authedFid, fid);
+            return Forbid();
+        }
+
         if (file is null || file.Length == 0)
             return BadRequest("No file provided.");
 

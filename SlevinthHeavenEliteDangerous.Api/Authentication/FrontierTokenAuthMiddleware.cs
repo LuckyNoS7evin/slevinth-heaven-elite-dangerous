@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 
 namespace SlevinthHeavenEliteDangerous.Api.Authentication;
@@ -13,6 +15,8 @@ public class FrontierTokenAuthMiddleware(RequestDelegate next, IMemoryCache cach
 {
     private const string CapiProfileUrl = "https://companion.orerve.net/profile";
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
+
+    private record TokenCacheEntry(string CommanderName, string? Fid);
 
     /// <summary>
     /// Path prefixes that should bypass bearer token validation
@@ -51,20 +55,30 @@ public class FrontierTokenAuthMiddleware(RequestDelegate next, IMemoryCache cach
         }
 
         var token = authHeader["Bearer ".Length..].Trim();
+        var cacheKey = HashToken(token);
 
-        if (!cache.TryGetValue(token, out string? commanderName))
+        if (!cache.TryGetValue(cacheKey, out TokenCacheEntry? entry))
         {
             var validated = await ValidateWithFrontierAsync(context, httpClientFactory, token);
             if (!validated.IsValid)
                 return; // response already written
 
-            commanderName = validated.CommanderName;
-            cache.Set(token, commanderName ?? string.Empty, CacheTtl);
+            entry = new TokenCacheEntry(validated.CommanderName ?? string.Empty, validated.Fid);
+            cache.Set(cacheKey, entry, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = CacheTtl,
+                Size = 1,
+            });
         }
 
-        context.Items["CommanderName"] = commanderName;
+        context.Items["CommanderName"] = entry?.CommanderName;
+        context.Items["CommanderFid"] = entry?.Fid;
         await next(context);
     }
+
+    /// <summary>SHA-256 hash of the raw token — never store the token itself as a cache key.</summary>
+    private static string HashToken(string token) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 
     private static bool ShouldSkip(string path, HttpContext context)
     {
@@ -87,7 +101,7 @@ public class FrontierTokenAuthMiddleware(RequestDelegate next, IMemoryCache cach
         return true;
     }
 
-    private static async Task<(bool IsValid, string? CommanderName)> ValidateWithFrontierAsync(
+    private static async Task<(bool IsValid, string? CommanderName, string? Fid)> ValidateWithFrontierAsync(
         HttpContext context,
         IHttpClientFactory httpClientFactory,
         string token)
@@ -104,24 +118,30 @@ public class FrontierTokenAuthMiddleware(RequestDelegate next, IMemoryCache cach
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 await context.Response.WriteAsync("Invalid or expired Frontier token.");
-                return (false, null);
+                return (false, null, null);
             }
 
             var body = await response.Content.ReadAsStringAsync();
             var doc = JsonDocument.Parse(body);
 
-            var commanderName = doc.RootElement.TryGetProperty("commander", out var cmdr) &&
-                                cmdr.TryGetProperty("name", out var nameProp)
-                ? nameProp.GetString()
-                : null;
+            string? commanderName = null;
+            string? fid = null;
 
-            return (true, commanderName);
+            if (doc.RootElement.TryGetProperty("commander", out var cmdr))
+            {
+                if (cmdr.TryGetProperty("name", out var nameProp))
+                    commanderName = nameProp.GetString();
+                if (cmdr.TryGetProperty("id", out var idProp))
+                    fid = idProp.ToString();
+            }
+
+            return (true, commanderName, fid);
         }
         catch (Exception ex)
         {
             context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             await context.Response.WriteAsync($"Unable to verify token with Frontier: {ex.Message}");
-            return (false, null);
+            return (false, null, null);
         }
     }
 }

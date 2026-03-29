@@ -23,10 +23,16 @@ public sealed class JournalFileStore
         fid = Sanitise(fid);
         fileName = SanitiseFileName(fileName);
 
-        var dir = Path.Combine(_basePath, fid);
+        var dir = Path.GetFullPath(Path.Combine(_basePath, fid));
+        if (!dir.StartsWith(Path.GetFullPath(_basePath), StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Invalid FID: path traversal detected.");
+
+        var filePath = Path.GetFullPath(Path.Combine(dir, fileName));
+        if (!filePath.StartsWith(dir, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Invalid file name: path traversal detected.");
+
         Directory.CreateDirectory(dir);
 
-        var filePath = Path.Combine(dir, fileName);
         await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
         await content.CopyToAsync(fs);
     }
@@ -70,6 +76,7 @@ public sealed class JournalFileStore
     private static string SanitiseFileName(string name)
     {
         var invalid = Path.GetInvalidFileNameChars();
-        return string.Concat(name.Where(c => !invalid.Contains(c)));
+        var sanitised = string.Concat(name.Where(c => !invalid.Contains(c)));
+        return sanitised.Length > 128 ? sanitised[..128] : sanitised;
     }
 }

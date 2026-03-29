@@ -2,6 +2,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using SlevinthHeavenEliteDangerous.Api.Authentication;
 using SlevinthHeavenEliteDangerous.Api.Components;
 using SlevinthHeavenEliteDangerous.Api.Discord;
@@ -13,8 +14,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-builder.Services.AddMemoryCache();
+builder.Services.AddMemoryCache(options => options.SizeLimit = 4096);
 builder.Services.AddHttpClient("frontier-capi");
+
+// Persist Data Protection keys so antiforgery tokens and auth cookies survive container restarts.
+// Mount /data/keys as a Docker volume in Portainer.
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/data/keys"));
 
 // Blazor Server (static SSR + interactive server for components that need it)
 builder.Services.AddRazorComponents()
@@ -28,6 +34,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/auth/logout";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
 // Commander data stores

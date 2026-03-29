@@ -24,12 +24,22 @@ public class JournalController(
     public async Task<IActionResult> Upload(IFormFile file, [FromForm] string fid)
     {
         var commanderName = HttpContext.Items["CommanderName"] as string;
+        var authedFid = HttpContext.Items["CommanderFid"] as string;
 
         if (file is null || file.Length == 0)
             return BadRequest("No file provided.");
 
         if (string.IsNullOrWhiteSpace(fid))
             return BadRequest("FID is required.");
+
+        if (!string.IsNullOrEmpty(authedFid) &&
+            !string.Equals(authedFid, fid, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogWarning(
+                "[Journal] FID mismatch: token belongs to {AuthedFid} but upload claimed {SubmittedFid}",
+                authedFid, fid);
+            return Forbid();
+        }
 
         var fileName = file.FileName;
         if (string.IsNullOrWhiteSpace(fileName))
