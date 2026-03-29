@@ -367,6 +367,47 @@ a:hover {
     color: var(--accent);
 }
 
+/* ---- Cookie Banner ---- */
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    z-index: 999;
+    flex-wrap: wrap;
+}
+.cookie-banner-text {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+.cookie-banner-text strong {
+    color: var(--text-primary);
+    margin-right: 0.5rem;
+}
+.cookie-banner-btn {
+    flex-shrink: 0;
+    padding: 0.4rem 1.1rem;
+    background: transparent;
+    border: 1px solid var(--accent-dim);
+    border-radius: 4px;
+    color: var(--accent);
+    font-size: 0.88rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.cookie-banner-btn:hover {
+    background: var(--accent-dim);
+    color: #fff;
+}
+
 .screenshot-clickable {
     cursor: zoom-in;
 }

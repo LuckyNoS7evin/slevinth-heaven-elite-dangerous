@@ -46,6 +46,22 @@
     </footer>
 </div>
 
+<div id="cookie-banner" class="cookie-banner" style="display:none">
+    <div class="cookie-banner-text">
+        <strong>Cookies</strong>
+        This site uses cookies that are essential for it to function — they keep you logged in and secure your session.
+        No tracking or advertising cookies are used.
+    </div>
+    <button class="cookie-banner-btn" onclick="document.getElementById('cookie-banner').style.display='none'; localStorage.setItem('cookieNoticeAck','1')">
+        Got it
+    </button>
+</div>
+<script>
+    if (!localStorage.getItem('cookieNoticeAck')) {
+        document.getElementById('cookie-banner').style.display = 'flex';
+    }
+</script>
+
 @code {
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
