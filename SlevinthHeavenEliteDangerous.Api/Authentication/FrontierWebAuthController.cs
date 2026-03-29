@@ -50,7 +50,11 @@ public class FrontierWebAuthController(
         var state = Base64UrlEncode(rawState);
 
         // Store verifier in cache keyed by state (5 min TTL)
-        cache.Set($"pkce:{state}", verifier, TimeSpan.FromMinutes(5));
+        cache.Set($"pkce:{state}", verifier, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+            Size = 1,
+        });
 
         var redirectUri = GetRedirectUri();
 

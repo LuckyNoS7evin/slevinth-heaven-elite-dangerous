@@ -18,9 +18,9 @@ builder.Services.AddMemoryCache(options => options.SizeLimit = 4096);
 builder.Services.AddHttpClient("frontier-capi");
 
 // Persist Data Protection keys so antiforgery tokens and auth cookies survive container restarts.
-// Mount /data/keys as a Docker volume in Portainer.
+// Keys are stored in Data/Keys within the app content root — mount that path as a Docker volume.
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/data/keys"));
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Data", "Keys")));
 
 // Blazor Server (static SSR + interactive server for components that need it)
 builder.Services.AddRazorComponents()
@@ -35,7 +35,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.SlidingExpiration = true;
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
