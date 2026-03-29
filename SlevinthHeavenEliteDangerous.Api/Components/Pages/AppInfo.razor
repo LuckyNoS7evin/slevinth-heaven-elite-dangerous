@@ -1,0 +1,122 @@
+@page "/app-info"
+
+<PageTitle>Slevinth Heaven Elite Dangerous — App Info</PageTitle>
+
+<div class="page-header">
+    <h1>App Info</h1>
+    <p class="subtitle">What Slevinth Heaven Elite Dangerous does and where it's headed.</p>
+</div>
+
+<div class="card-section">
+    <h2>What is Slevinth Heaven Elite Dangerous?</h2>
+    <p class="app-info-description">
+        Slevinth Heaven Elite Dangerous is a companion tool for <strong>Elite Dangerous</strong>. A lightweight desktop app runs
+        alongside the game and reads your journal files, uploading your activity to this web dashboard in real time.
+        You can track your stats, review your combat history, log exobiology samples, and explore the systems you
+        have visited — all from any browser, without digging through raw journal files.
+    </p>
+    <p class="app-info-description">
+        Data is tied to your Frontier account via OAuth, so only you can upload to your own profile. Other
+        commanders on the same instance can see your public stats, making it easy to compare progress with friends. 
+        This will not display current in-game location, ship loadout, cartography data or exobiology data, so you can use it without worrying about spoilers or sharing sensitive
+        information. Cartography and Exobiology data is visible once sold to a station with limited visibility.
+    </p>
+</div>
+
+<div class="card-section">
+    <h2>Current Features</h2>
+
+    <div class="feature-block">
+        <div class="feature-text">
+            <h3>General Stats</h3>
+            <p>
+                A high-level overview of your commander: combat rank, trade rank, exploration rank, CQC rank,
+                faction reputation, total wealth, ships owned, systems visited, hyperspace jumps, distance
+                travelled, and total play time. All sourced directly from your in-game journal.
+            </p>
+        </div>
+        <div class="feature-screenshot">
+            <img src="screenshots/General.png" alt="General stats screenshot" class="screenshot-img" />
+        </div>
+    </div>
+
+    <div class="feature-block feature-block-reverse">
+        <div class="feature-text">
+            <h3>Combat Log</h3>
+            <p>
+                Every PvE and PvP kill is recorded with the target's ship type, faction, and the system where
+                the engagement happened. The log is paginated and sorted by most recent, giving you a full
+                history of your combat career.
+            </p>
+        </div>
+        <div class="feature-screenshot">
+            <img src="screenshots/CombatLog.png" alt="Combat log screenshot" class="screenshot-img" />
+        </div>
+    </div>
+
+    <div class="feature-block">
+        <div class="feature-text">
+            <h3>Exobiology Tracker</h3>
+            <p>
+                Tracks every biological sample you have logged, grouped by species and planet. Shows the
+                estimated value of each organism and a running total so you know exactly what to hand in
+                at the nearest Vista Genomics.
+            </p>
+        </div>
+        <div class="feature-screenshot">
+            <img src="screenshots/ExoBio.png" alt="Exobiology tracker screenshot" class="screenshot-img" />
+        </div>
+    </div>
+
+    <div class="feature-block feature-block-reverse">
+        <div class="feature-text">
+            <h3>Visited Systems</h3>
+            <p>
+                A searchable list of the last 50 systems you have jumped to, with the option to expand individual
+                entries to see the bodies and stations within. Collapsed rows give a quick count of bodies
+                and notable objects; expanded rows show full detail.
+            </p>
+        </div>
+        <div class="feature-screenshot">
+            <div class="screenshot-pair">
+                <img src="screenshots/VisitedSystemsCollapsedSystem.png" alt="Visited systems collapsed" class="screenshot-img" />
+                <img src="screenshots/VisitedSystemsExpandedSystem.png" alt="Visited systems expanded" class="screenshot-img" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-section">
+    <h2>Planned Features</h2>
+    <ul class="feature-list">
+        <li>
+            <span class="feature-list-title">Mining Log</span>
+            Track ore types, quantities mined, and the systems where you mined them, with estimated profit
+            per session.
+        </li>
+        <li>
+            <span class="feature-list-title">Trade Route History</span>
+            Log every buy and sell transaction so you can identify your most profitable trade runs and
+            stations over time.
+        </li>
+        <li>
+            <span class="feature-list-title">Fleet Carrier Tracking</span>
+            Monitor your fleet carrier's jump history, current location, and cargo ledger if you own one.
+        </li>
+        <li>
+            <span class="feature-list-title">Exploration Heat Map</span>
+            A visual map of the galaxy regions you have visited, highlighting first-discovered bodies and
+            distance records from the bubble.
+        </li>
+        <li>
+            <span class="feature-list-title">Mission History</span>
+            A summary of completed missions broken down by type, faction, and reward, so you can see which
+            activities have been the most lucrative.
+        </li>
+        <li>
+            <span class="feature-list-title">Discord Notifications</span>
+            Opt-in push notifications to a Discord channel when you hit rank milestones, complete a long
+            exploration trip, or log a high-value exobiology sample.
+        </li>
+    </ul>
+</div>
