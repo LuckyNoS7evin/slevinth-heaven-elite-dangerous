@@ -367,6 +367,47 @@ a:hover {
     color: var(--accent);
 }
 
+.screenshot-clickable {
+    cursor: zoom-in;
+}
+
+/* ---- Lightbox ---- */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1.5rem;
+    cursor: zoom-out;
+}
+.lightbox-img {
+    max-width: 100%;
+    max-height: 90vh;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.8);
+}
+.lightbox-close {
+    position: fixed;
+    top: 1rem;
+    right: 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0.35rem 0.65rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.lightbox-close:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
 /* ---- App Info Page ---- */
 .app-info-description {
     color: var(--text-secondary);

@@ -16,8 +16,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient("frontier-capi");
 
-// Blazor Server (static SSR)
-builder.Services.AddRazorComponents();
+// Blazor Server (static SSR + interactive server for components that need it)
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 
 // Cookie authentication for web sessions
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -78,6 +79,7 @@ app.UseAntiforgery();
 app.UseMiddleware<FrontierTokenAuthMiddleware>();
 
 app.MapControllers();
-app.MapRazorComponents<App>();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 app.Run();

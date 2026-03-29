@@ -1,6 +1,15 @@
 @page "/app-info"
+@rendermode InteractiveServer
 
 <PageTitle>Slevinth Heaven Elite Dangerous — App Info</PageTitle>
+
+@if (_lightboxSrc is not null)
+{
+    <div class="lightbox-overlay" @onclick="CloseLightbox">
+        <img src="@_lightboxSrc" alt="@_lightboxAlt" class="lightbox-img" @onclick:stopPropagation="true" />
+        <button class="lightbox-close" @onclick="CloseLightbox" aria-label="Close">✕</button>
+    </div>
+}
 
 <div class="page-header">
     <h1>App Info</h1>
@@ -36,7 +45,7 @@
             </p>
         </div>
         <div class="feature-screenshot">
-            <img src="screenshots/General.png" alt="General stats screenshot" class="screenshot-img" />
+            <img src="screenshots/General.png" alt="General stats screenshot" class="screenshot-img screenshot-clickable" @onclick='() => OpenLightbox("screenshots/General.png", "General stats screenshot")' />
         </div>
     </div>
 
@@ -50,7 +59,7 @@
             </p>
         </div>
         <div class="feature-screenshot">
-            <img src="screenshots/CombatLog.png" alt="Combat log screenshot" class="screenshot-img" />
+            <img src="screenshots/CombatLog.png" alt="Combat log screenshot" class="screenshot-img screenshot-clickable" @onclick='() => OpenLightbox("screenshots/CombatLog.png", "Combat log screenshot")' />
         </div>
     </div>
 
@@ -64,7 +73,7 @@
             </p>
         </div>
         <div class="feature-screenshot">
-            <img src="screenshots/ExoBio.png" alt="Exobiology tracker screenshot" class="screenshot-img" />
+            <img src="screenshots/ExoBio.png" alt="Exobiology tracker screenshot" class="screenshot-img screenshot-clickable" @onclick='() => OpenLightbox("screenshots/ExoBio.png", "Exobiology tracker screenshot")' />
         </div>
     </div>
 
@@ -79,8 +88,8 @@
         </div>
         <div class="feature-screenshot">
             <div class="screenshot-pair">
-                <img src="screenshots/VisitedSystemsCollapsedSystem.png" alt="Visited systems collapsed" class="screenshot-img" />
-                <img src="screenshots/VisitedSystemsExpandedSystem.png" alt="Visited systems expanded" class="screenshot-img" />
+                <img src="screenshots/VisitedSystemsCollapsedSystem.png" alt="Visited systems collapsed" class="screenshot-img screenshot-clickable" @onclick='() => OpenLightbox("screenshots/VisitedSystemsCollapsedSystem.png", "Visited systems collapsed")' />
+                <img src="screenshots/VisitedSystemsExpandedSystem.png" alt="Visited systems expanded" class="screenshot-img screenshot-clickable" @onclick='() => OpenLightbox("screenshots/VisitedSystemsExpandedSystem.png", "Visited systems expanded")' />
             </div>
         </div>
     </div>
@@ -120,3 +129,16 @@
         </li>
     </ul>
 </div>
+
+@code {
+    private string? _lightboxSrc;
+    private string? _lightboxAlt;
+
+    private void OpenLightbox(string src, string alt)
+    {
+        _lightboxSrc = src;
+        _lightboxAlt = alt;
+    }
+
+    private void CloseLightbox() => _lightboxSrc = null;
+}
