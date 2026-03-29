@@ -30,6 +30,7 @@ public static class ServiceConfiguration
         services.AddSingleton<CommanderStatsService>();
         services.AddSingleton<ReputationService>();
         services.AddSingleton<CodexService>();
+        services.AddSingleton<CombatService>();
         services.AddSingleton<ApiConfigService>();
         services.AddSingleton<FrontierAuthDataService>();
         services.AddSingleton<FrontierAuthService>();

@@ -36,6 +36,7 @@ public sealed class StartupService : IStartupService
     private readonly CommanderStatsService _commanderStatsService;
     private readonly ReputationService _reputationService;
     private readonly CodexService _codexService;
+    private readonly CombatService _combatService;
     private readonly ApiConfigService _apiConfigService;
     private readonly FrontierAuthService _frontierAuthService;
     private readonly JournalUploadService _journalUploadService;
@@ -65,6 +66,7 @@ public sealed class StartupService : IStartupService
         CommanderStatsService commanderStatsService,
         ReputationService reputationService,
         CodexService codexService,
+        CombatService combatService,
         ApiConfigService apiConfigService,
         FrontierAuthService frontierAuthService,
         JournalUploadService journalUploadService,
@@ -80,6 +82,7 @@ public sealed class StartupService : IStartupService
         _commanderStatsService = commanderStatsService ?? throw new ArgumentNullException(nameof(commanderStatsService));
         _reputationService = reputationService ?? throw new ArgumentNullException(nameof(reputationService));
         _codexService = codexService ?? throw new ArgumentNullException(nameof(codexService));
+        _combatService = combatService ?? throw new ArgumentNullException(nameof(combatService));
         _apiConfigService = apiConfigService ?? throw new ArgumentNullException(nameof(apiConfigService));
         _frontierAuthService = frontierAuthService ?? throw new ArgumentNullException(nameof(frontierAuthService));
         _journalUploadService = journalUploadService ?? throw new ArgumentNullException(nameof(journalUploadService));
@@ -112,6 +115,7 @@ public sealed class StartupService : IStartupService
                 "commander_stats_data.json",
                 "reputation_data.json",
                 "codex_data.json",
+                "combat_data.json",
             };
 
             bool allFilesPresent = true;
@@ -164,6 +168,7 @@ public sealed class StartupService : IStartupService
             await _commanderStatsService.LoadDataAsync();
             await _reputationService.LoadDataAsync();
             await _codexService.LoadDataAsync();
+            await _combatService.LoadDataAsync();
 
             return false; // No initial scan needed
         }
@@ -314,6 +319,7 @@ public sealed class StartupService : IStartupService
         _journalEventService.RegisterEventHandler(_commanderStatsService);
         _journalEventService.RegisterEventHandler(_reputationService);
         _journalEventService.RegisterEventHandler(_codexService);
+        _journalEventService.RegisterEventHandler(_combatService);
 
         // VoCoreDisplayService should listen to ExoBioService events instead of raw journal events
         try

@@ -81,6 +81,13 @@
                     </TabViewItem.Content>
                 </TabViewItem>
 
+                <!-- Combat Tab -->
+                <TabViewItem Header="Combat" IsClosable="False">
+                    <TabViewItem.Content>
+                        <controls:CombatControl x:Name="CombatControl" />
+                    </TabViewItem.Content>
+                </TabViewItem>
+
                 <!-- Frontier Account Tab removed - login is handled at startup -->
                 </TabView>
             </Grid>
