@@ -168,7 +168,8 @@ public sealed class FSDService : IEventHandler, IDisposable
         {
             var timeDiff = (evt.Timestamp - _state.LastJumpTimestamp.Value).TotalMilliseconds;
 
-            if (timeDiff <= 86_400_000)
+            // Ignore negative intervals (out-of-order timestamps) and any intervals > 24 hours
+            if (timeDiff > 0 && timeDiff <= 86_400_000)
             {
                 // Incremental average: (existingCount * oldAvg + newValue) / (existingCount + 1)
                 // Interval count so far = TotalJumps - 1 (first jump sets timestamp, no interval yet)
@@ -190,7 +191,14 @@ public sealed class FSDService : IEventHandler, IDisposable
         }
 
         _state.TotalJumps++;
-        _state.LastJumpTimestamp = evt.Timestamp;
+
+        // Only update the last jump timestamp when the incoming event is newer than the stored value.
+        // This prevents out-of-order events from moving the timestamp backwards and producing
+        // negative interval values for subsequent jumps.
+        if (!_state.LastJumpTimestamp.HasValue || evt.Timestamp > _state.LastJumpTimestamp.Value)
+        {
+            _state.LastJumpTimestamp = evt.Timestamp;
+        }
     }
 
     private void HandleFSDTargetEvent(FSDTargetEvent evt)
@@ -201,6 +209,23 @@ public sealed class FSDService : IEventHandler, IDisposable
             RemainingJumps = evt.RemainingJumpsInRoute ?? 0,
             FinalDestination = _currentFinalDestination
         };
+
+        // Compute an estimated arrival time (UTC) using the average fast jump time
+        // stored in _state.AvgTimeFastJumps (milliseconds). Only provide an estimate
+        // when we have both a non-zero remaining jumps count and a recorded average.
+        if (target.RemainingJumps > 0 && _state.AvgTimeFastJumps > 0)
+        {
+            try
+            {
+                var estimatedMs = target.RemainingJumps * _state.AvgTimeFastJumps;
+                target.EstimatedArrivalUtc = DateTime.UtcNow.AddMilliseconds(estimatedMs);
+            }
+            catch
+            {
+                // On overflow or other errors, leave estimate as null.
+                target.EstimatedArrivalUtc = null;
+            }
+        }
 
         TargetUpdated?.Invoke(this, new FSDTargetUpdatedEventArgs(target));
     }

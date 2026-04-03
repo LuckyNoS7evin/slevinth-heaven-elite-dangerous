@@ -52,7 +52,10 @@ public class ServerCommanderData
 
 public class ServerCommanderStats
 {
+    // Net worth as reported by the Statistics event
     public long CurrentWealth { get; set; }
+    // Wallet / bank balance reported from LoadGameEvent Credits (private)
+    public long WalletBalance { get; set; }
     public int OwnedShipCount { get; set; }
     public int SystemsVisited { get; set; }
     public long ExplorationProfits { get; set; }

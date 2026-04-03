@@ -55,6 +55,8 @@ public class ReputationDto
 public class CommanderStatsDto
 {
     public long CurrentWealth { get; set; }
+    // Wallet / bank balance visible only to the profile owner
+    public long WalletBalance { get; set; }
     public int OwnedShipCount { get; set; }
     public int SystemsVisited { get; set; }
     public long ExplorationProfits { get; set; }

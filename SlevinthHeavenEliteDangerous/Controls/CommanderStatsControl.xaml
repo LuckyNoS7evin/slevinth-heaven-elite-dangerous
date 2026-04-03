@@ -32,13 +32,19 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Spacing="2">
-                            <TextBlock Text="Current Wealth" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock Text="Net Worth" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                             <TextBlock Text="{Binding CurrentWealthFormatted, Mode=OneWay}" FontSize="18" FontWeight="SemiBold"
                                    Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Spacing="2">
+                            <TextBlock Text="Bank Balance" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock Text="{Binding WalletBalanceFormatted, Mode=OneWay}" FontSize="18" FontWeight="SemiBold"
+                                   Foreground="{ThemeResource SystemFillColorSuccessBrush}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Spacing="2">
                             <TextBlock Text="Ships Owned" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                             <TextBlock Text="{Binding OwnedShipCount, Mode=OneWay}" FontSize="18" FontWeight="SemiBold"/>
                         </StackPanel>

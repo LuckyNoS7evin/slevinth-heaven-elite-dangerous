@@ -22,6 +22,8 @@ public sealed class CommanderStatsService : IEventHandler
     {
         if (evt is StatisticsEvent statistics)
             HandleStatisticsEvent(statistics);
+        else if (evt is LoadGameEvent load)
+            HandleLoadGameEvent(load);
     }
 
     public async Task LoadDataAsync()
@@ -66,6 +68,16 @@ public sealed class CommanderStatsService : IEventHandler
             ExobiologyProfits    = evt.Exobiology?.ExobiologyProfits ?? 0,
             OrganicSpeciesAnalysed = evt.Exobiology?.OrganicData ?? 0,
         };
+
+        StatsUpdated?.Invoke(this, new CommanderStatsUpdatedEventArgs(_stats));
+        _ = _dataService.SaveDataAsync(_stats);
+    }
+
+    private void HandleLoadGameEvent(LoadGameEvent evt)
+    {
+        // LoadGameEvent contains the current bank Credits when the game is started/loaded.
+        // Use it to set the commander bank balance so the UI can show the in-game wallet value.
+        _stats.WalletBalance = evt.Credits;
 
         StatsUpdated?.Invoke(this, new CommanderStatsUpdatedEventArgs(_stats));
         _ = _dataService.SaveDataAsync(_stats);

@@ -14,6 +14,7 @@ public sealed class CommanderStatsViewModel : INotifyPropertyChanged, IDisposabl
 
     // Bank Account
     private long _currentWealth;
+    private long _walletBalance;
     private int _ownedShipCount;
 
     // Exploration
@@ -59,6 +60,7 @@ public sealed class CommanderStatsViewModel : INotifyPropertyChanged, IDisposabl
     private void UpdateFromModel(CommanderStatsModel m)
     {
         CurrentWealth           = m.CurrentWealth;
+        WalletBalance           = m.WalletBalance;
         OwnedShipCount          = m.OwnedShipCount;
         SystemsVisited          = m.SystemsVisited;
         ExplorationProfits      = m.ExplorationProfits;
@@ -80,12 +82,18 @@ public sealed class CommanderStatsViewModel : INotifyPropertyChanged, IDisposabl
         get => _currentWealth;
         private set { if (_currentWealth != value) { _currentWealth = value; OnPropertyChanged(); OnPropertyChanged(nameof(CurrentWealthFormatted)); } }
     }
+    public long WalletBalance
+    {
+        get => _walletBalance;
+        private set { if (_walletBalance != value) { _walletBalance = value; OnPropertyChanged(); OnPropertyChanged(nameof(WalletBalanceFormatted)); } }
+    }
     public int OwnedShipCount
     {
         get => _ownedShipCount;
         private set { if (_ownedShipCount != value) { _ownedShipCount = value; OnPropertyChanged(); } }
     }
     public string CurrentWealthFormatted => $"{CurrentWealth:N0} CR";
+    public string WalletBalanceFormatted => $"{WalletBalance:N0} CR";
 
     // --- Exploration ---
     public int SystemsVisited

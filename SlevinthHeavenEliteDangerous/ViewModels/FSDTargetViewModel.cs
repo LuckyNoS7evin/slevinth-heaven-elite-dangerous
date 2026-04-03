@@ -12,6 +12,7 @@ public sealed class FSDTargetViewModel : INotifyPropertyChanged
     private string _nextSystem = "No Target";
     private int _remainingJumps = 0;
     private string _finalDestination = string.Empty;
+    private DateTime? _estimatedArrivalUtc;
 
     public string NextSystem
     {
@@ -56,7 +57,59 @@ public sealed class FSDTargetViewModel : INotifyPropertyChanged
         }
     }
 
-    public string RemainingJumpsFormatted => RemainingJumps > 0 ? RemainingJumps.ToString() : "-";
+    public DateTime? EstimatedArrivalUtc
+    {
+        get => _estimatedArrivalUtc;
+        set
+        {
+            if (_estimatedArrivalUtc != value)
+            {
+                _estimatedArrivalUtc = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(EstimatedArrivalFormatted));
+                OnPropertyChanged(nameof(RemainingJumpsFormatted));
+            }
+        }
+    }
+
+    public string RemainingJumpsFormatted
+    {
+        get
+        {
+            if (RemainingJumps <= 0) return "-";
+
+            if (EstimatedArrivalUtc.HasValue)
+            {
+                return $"{RemainingJumps} (ETA {EstimatedArrivalFormatted})";
+            }
+
+            return RemainingJumps.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Formats the estimated arrival time for display. Uses `HH:mm:ss` when the
+    /// remaining duration contains an hour segment; otherwise uses `mm:ss` as requested.
+    /// </summary>
+    public string EstimatedArrivalFormatted
+    {
+        get
+        {
+            if (!EstimatedArrivalUtc.HasValue) return "-";
+
+            var arrivalLocal = EstimatedArrivalUtc.Value.ToLocalTime();
+            var remaining = EstimatedArrivalUtc.Value - DateTime.UtcNow;
+
+            if (remaining.TotalSeconds <= 0)
+                return arrivalLocal.ToString("HH:mm:ss");
+
+            if (remaining.TotalHours >= 1)
+                return arrivalLocal.ToString("HH:mm:ss");
+
+            // No hour segment -> show minute:second of the arrival time
+            return arrivalLocal.ToString("mm:ss");
+        }
+    }
 
     /// <summary>
     /// True when a multi-hop route is active and the final destination differs from the immediate next system.
@@ -78,6 +131,7 @@ public sealed class FSDTargetViewModel : INotifyPropertyChanged
         NextSystem = model.NextSystem;
         RemainingJumps = model.RemainingJumps;
         FinalDestination = model.FinalDestination;
+        EstimatedArrivalUtc = model.EstimatedArrivalUtc;
     }
 
     public void ClearTarget()
@@ -85,5 +139,6 @@ public sealed class FSDTargetViewModel : INotifyPropertyChanged
         NextSystem = "No Target";
         RemainingJumps = 0;
         FinalDestination = string.Empty;
+        EstimatedArrivalUtc = null;
     }
 }

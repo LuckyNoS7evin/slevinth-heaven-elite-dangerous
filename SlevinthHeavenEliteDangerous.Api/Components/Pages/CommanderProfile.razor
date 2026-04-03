@@ -77,8 +77,12 @@ else
         <h2>Statistics</h2>
         <div class="stat-grid">
             <div class="stat-card">
-                <div class="stat-label">Current Wealth</div>
+                <div class="stat-label">Net Worth</div>
                 <div class="stat-value">@_profile.Stats.CurrentWealth.ToString("N0") CR</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Bank Balance @VisIcon(_profile.IsOwnProfile)</div>
+                <div class="stat-value">@(_profile.IsOwnProfile ? $"{_profile.Stats.WalletBalance:N0} CR" : "—")</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Ships Owned</div>
@@ -448,6 +452,7 @@ else
             Stats = new CommanderStatsDto
             {
                 CurrentWealth = data.Stats.CurrentWealth,
+                WalletBalance = isOwner ? data.Stats.WalletBalance : 0,
                 OwnedShipCount = data.Stats.OwnedShipCount,
                 SystemsVisited = data.Stats.SystemsVisited,
                 ExplorationProfits = data.Stats.ExplorationProfits,

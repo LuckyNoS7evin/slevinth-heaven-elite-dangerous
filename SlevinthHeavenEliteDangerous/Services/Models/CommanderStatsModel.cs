@@ -3,7 +3,10 @@ namespace SlevinthHeavenEliteDangerous.Services.Models;
 public class CommanderStatsModel
 {
     // Bank Account
+    // Net worth as reported by the Statistics event
     public long CurrentWealth { get; set; }
+    // Wallet / bank balance reported when the game is started (LoadGameEvent Credits)
+    public long WalletBalance { get; set; }
     public int OwnedShipCount { get; set; }
 
     // Exploration
