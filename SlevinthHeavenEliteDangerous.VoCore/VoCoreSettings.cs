@@ -33,21 +33,23 @@ public sealed class VoCoreSettings
     [JsonPropertyName("ProductId")]
     public string ProductIdHex { get; set; } = "0x1004";
 
-    /// <summary>Display width in pixels.</summary>
+    /// <summary>Display width in pixels (portrait mode).</summary>
     [JsonPropertyName("Width")]
-    public int Width { get; set; } = 854;
+    public int Width { get; set; } = 480;
 
-    /// <summary>Display height in pixels.</summary>
+    /// <summary>Display height in pixels (portrait mode).</summary>
     [JsonPropertyName("Height")]
-    public int Height { get; set; } = 480;
+    public int Height { get; set; } = 854;
 
     /// <summary>
     /// Number of pixels to circular-shift each row left before sending to the display.
     /// The VoCore Screen framebuffer origin is offset from pixel 0 — this corrects it.
-    /// Increase to shift content left, decrease to shift right. Default 240 (half of 480).
+    /// Increase to shift content left, decrease to shift right. 
+    /// Portrait mode (480x854): Default 325 (empirically determined)
+    /// Landscape mode (854x480): Default 240 (empirically determined)
     /// </summary>
     [JsonPropertyName("ColumnOffset")]
-    public int ColumnOffset { get; set; } = 240;
+    public int ColumnOffset { get; set; } = 325;
 
     /// <summary>
     /// Set to true to skip the vendor control transfers and send raw bulk data directly.

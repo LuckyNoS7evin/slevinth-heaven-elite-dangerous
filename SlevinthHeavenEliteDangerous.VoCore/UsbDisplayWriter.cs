@@ -176,6 +176,7 @@ internal sealed class UsbDisplayWriter : IDisposable
     /// One-time display initialization sequence captured from the official VoCore Screen test app.
     /// Sets the display window, orientation and other controller parameters.
     /// Without this the framebuffer origin is offset (appears ~half-way across the screen).
+    /// Portrait mode (Width < Height) uses different orientation commands than landscape.
     /// </summary>
     private void InitializeDisplay()
     {
@@ -192,15 +193,29 @@ internal sealed class UsbDisplayWriter : IDisposable
             _device!.ControlTransfer(ref setup, buf, length, out _);
         }
 
+        bool isPortrait = Width < Height;
+
         In (0x5F, 0x0000,                   0, 7);   // get display info (response ignored)
         Out(0xA1, 0x0000,                   0);       // init display
-        Out(0x9A, 0x1312, unchecked((short)0xD982));  // set window / orientation
-        Out(0x9A, 0x0F2C, 0x0007);                   // set window / orientation
+
+        if (isPortrait)
+        {
+            // Portrait mode orientation commands (90-degree rotation from landscape)
+            Out(0x9A, 0x1312, unchecked((short)0xD9C2));  // set window / orientation (portrait)
+            Out(0x9A, 0x0F2C, 0x0006);                   // set window / orientation (portrait)
+        }
+        else
+        {
+            // Landscape mode orientation commands (original)
+            Out(0x9A, 0x1312, unchecked((short)0xD982));  // set window / orientation (landscape)
+            Out(0x9A, 0x0F2C, 0x0007);                   // set window / orientation (landscape)
+        }
+
         In (0x95, 0x2518,                   0, 2);    // read status (ignored)
         In (0x95, 0x0706,                   0, 2);    // read status (ignored)
         Out(0x9A, 0x2727,                   0);       // commit
 
-        Debug.WriteLine("[VoCore] Display initialized");
+        Debug.WriteLine($"[VoCore] Display initialized ({(isPortrait ? "portrait" : "landscape")} {Width}x{Height})");
     }
 
     /// <summary>

@@ -22,6 +22,7 @@ public sealed class FSDService : IEventHandler, IDisposable
     private readonly GeneralControlDataService _dataService = new();
     private FSDTimingModel _state = new();
     private string _currentFinalDestination = string.Empty;
+    private FSDTargetModel? _currentTarget = null;
     private bool _isLoading = false;
     private DateTime _lastSaveRequest = DateTime.MinValue;
     private readonly TimeSpan _saveDebounceDelay = TimeSpan.FromMilliseconds(500);
@@ -199,6 +200,13 @@ public sealed class FSDService : IEventHandler, IDisposable
         {
             _state.LastJumpTimestamp = evt.Timestamp;
         }
+
+        // After each jump, decrement remaining jumps and recalculate ETA
+        if (_currentTarget != null && _currentTarget.RemainingJumps > 0)
+        {
+            _currentTarget.RemainingJumps--;
+            CalculateAndUpdateETA(_currentTarget);
+        }
     }
 
     private void HandleFSDTargetEvent(FSDTargetEvent evt)
@@ -210,24 +218,8 @@ public sealed class FSDService : IEventHandler, IDisposable
             FinalDestination = _currentFinalDestination
         };
 
-        // Compute an estimated arrival time (UTC) using the average fast jump time
-        // stored in _state.AvgTimeFastJumps (milliseconds). Only provide an estimate
-        // when we have both a non-zero remaining jumps count and a recorded average.
-        if (target.RemainingJumps > 0 && _state.AvgTimeFastJumps > 0)
-        {
-            try
-            {
-                var estimatedMs = target.RemainingJumps * _state.AvgTimeFastJumps;
-                target.EstimatedArrivalUtc = DateTime.UtcNow.AddMilliseconds(estimatedMs);
-            }
-            catch
-            {
-                // On overflow or other errors, leave estimate as null.
-                target.EstimatedArrivalUtc = null;
-            }
-        }
-
-        TargetUpdated?.Invoke(this, new FSDTargetUpdatedEventArgs(target));
+        _currentTarget = target;
+        CalculateAndUpdateETA(target);
     }
 
     private void HandleNavRouteEvent()
@@ -255,7 +247,38 @@ public sealed class FSDService : IEventHandler, IDisposable
     private void HandleNavRouteClearEvent()
     {
         _currentFinalDestination = string.Empty;
+        _currentTarget = null;
         TargetUpdated?.Invoke(this, new FSDTargetUpdatedEventArgs(new FSDTargetModel()));
+    }
+
+    /// <summary>
+    /// Calculate the estimated arrival time for the given target based on the average fast jump time.
+    /// Updates the target's EstimatedArrivalUtc property and raises the TargetUpdated event.
+    /// </summary>
+    private void CalculateAndUpdateETA(FSDTargetModel target)
+    {
+        // Compute an estimated arrival time (UTC) using the average fast jump time
+        // stored in _state.AvgTimeFastJumps (milliseconds). Only provide an estimate
+        // when we have both a non-zero remaining jumps count and a recorded average.
+        if (target.RemainingJumps > 0 && _state.AvgTimeFastJumps > 0)
+        {
+            try
+            {
+                var estimatedMs = target.RemainingJumps * _state.AvgTimeFastJumps;
+                target.EstimatedArrivalUtc = DateTime.UtcNow.AddMilliseconds(estimatedMs);
+            }
+            catch
+            {
+                // On overflow or other errors, leave estimate as null.
+                target.EstimatedArrivalUtc = null;
+            }
+        }
+        else
+        {
+            target.EstimatedArrivalUtc = null;
+        }
+
+        TargetUpdated?.Invoke(this, new FSDTargetUpdatedEventArgs(target));
     }
 
 
