@@ -41,11 +41,15 @@ public sealed partial class MainWindow : Window
 
         InitializeComponent();
 
-        // Set window icon
+        // Set window icon using app resource URI
         var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
         appWindow.TitleBar.IconShowOptions = Microsoft.UI.Windowing.IconShowOptions.HideIconAndSystemMenu;
+
+        // Set the window icon from packaged assets
+        appWindow.SetIcon("Assets/elite_tracker_icon.ico");
+
         appWindow.Title = "Slevinth's Elite Dangerous Companion";
 
         this.Closed += OnWindowClosed;
