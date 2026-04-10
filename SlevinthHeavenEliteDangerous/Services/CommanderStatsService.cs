@@ -38,6 +38,10 @@ public sealed class CommanderStatsService : IEventHandler
             HandleCreditChange(redeemVoucher.Amount, "Voucher");
         else if (evt is MissionCompletedEvent missionCompleted)
             HandleCreditChange(missionCompleted.Reward ?? 0, "Mission Reward");
+        else if (evt is MissionAbandonedEvent missionAbandoned && missionAbandoned.Fine.HasValue)
+            HandleCreditChange(-missionAbandoned.Fine.Value, "Mission Abandoned Fine");
+        else if (evt is MissionFailedEvent missionFailed && missionFailed.Fine.HasValue)
+            HandleCreditChange(-missionFailed.Fine.Value, "Mission Failed Fine");
         else if (evt is ShipyardSellEvent shipyardSell)
             HandleCreditChange(shipyardSell.ShipPrice ?? 0, "Ship Sale");
         else if (evt is SearchAndRescueEvent searchRescue)
@@ -46,6 +50,16 @@ public sealed class CommanderStatsService : IEventHandler
             HandleCreditChange(sellDrones.TotalSale, "Drone Sale");
         else if (evt is SellMicroResourcesEvent sellMicro && sellMicro.Price.HasValue)
             HandleCreditChange(sellMicro.Price.Value, "Micro Resources");
+        else if (evt is PowerplaySalaryEvent powerplaySalary)
+            HandleCreditChange(powerplaySalary.Amount, "Powerplay Salary");
+        else if (evt is CarrierBankTransferEvent carrierTransfer)
+        {
+            // Withdraw adds to wallet, Deposit removes from wallet
+            if (carrierTransfer.Withdraw.HasValue)
+                HandleCreditChange(carrierTransfer.Withdraw.Value, "Carrier Withdrawal");
+            else if (carrierTransfer.Deposit.HasValue)
+                HandleCreditChange(-carrierTransfer.Deposit.Value, "Carrier Deposit");
+        }
         // Credit spending events
         else if (evt is MarketBuyEvent marketBuy)
             HandleCreditChange(-marketBuy.TotalCost, "Market Purchase");
@@ -99,6 +113,10 @@ public sealed class CommanderStatsService : IEventHandler
             HandleCreditChange(sellSuit.Price.Value, "Suit Sale");
         else if (evt is SellWeaponEvent sellWeapon && sellWeapon.Price.HasValue)
             HandleCreditChange(sellWeapon.Price.Value, "Weapon Sale");
+        else if (evt is NpcCrewPaidWageEvent crewWage)
+            HandleCreditChange(-crewWage.Amount, "NPC Crew Wage");
+        else if (evt is CarrierBuyEvent carrierBuy)
+            HandleCreditChange(-carrierBuy.Price, "Fleet Carrier Purchase");
     }
 
     public async Task LoadDataAsync()
