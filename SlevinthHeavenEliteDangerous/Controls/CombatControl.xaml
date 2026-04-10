@@ -393,12 +393,19 @@
                                                    Foreground="White"/>
                                     </Border>
 
-                                    <!-- Target + faction + rank -->
+                                    <!-- Target + pilot + faction + rank -->
                                     <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{x:Bind Target}"
-                                                   FontSize="13"
-                                                   FontWeight="SemiBold"
-                                                   TextTrimming="CharacterEllipsis"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{x:Bind Target}"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{x:Bind PilotName}"
+                                                       FontSize="12"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Visibility="{x:Bind PilotName, Converter={StaticResource StringToVisibility}}"/>
+                                        </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="6">
                                             <TextBlock Text="{x:Bind VictimFaction}"
                                                        FontSize="12"
@@ -407,8 +414,13 @@
                                                        Visibility="{x:Bind VictimFaction, Converter={StaticResource StringToVisibility}}"/>
                                             <TextBlock Text="{x:Bind VictimRankName}"
                                                        FontSize="12"
+                                                       FontWeight="SemiBold"
                                                        Foreground="{ThemeResource AccentFillColorDefaultBrush}"
                                                        Visibility="{x:Bind VictimRankName, Converter={StaticResource StringToVisibility}}"/>
+                                            <TextBlock Text="{x:Bind RankComparisonDisplay}"
+                                                       FontSize="11"
+                                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                       Visibility="{x:Bind RankComparisonDisplay, Converter={StaticResource StringToVisibility}}"/>
                                         </StackPanel>
                                     </StackPanel>
 

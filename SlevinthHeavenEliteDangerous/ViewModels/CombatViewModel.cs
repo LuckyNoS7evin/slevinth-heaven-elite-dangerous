@@ -224,7 +224,7 @@ public sealed class CombatViewModel : INotifyPropertyChanged, IDisposable
     {
         _dispatcherQueue.TryEnqueue(() =>
         {
-            KillLog.Insert(0, CombatKillEntryViewModel.FromRecord(e.Record));
+            KillLog.Insert(0, CombatKillEntryViewModel.FromRecord(e.Record, _combatRank));
         });
     }
 
@@ -241,7 +241,7 @@ public sealed class CombatViewModel : INotifyPropertyChanged, IDisposable
 
             KillLog.Clear();
             foreach (var record in e.State.KillLog)
-                KillLog.Add(CombatKillEntryViewModel.FromRecord(record));
+                KillLog.Add(CombatKillEntryViewModel.FromRecord(record, _combatRank));
         });
     }
 

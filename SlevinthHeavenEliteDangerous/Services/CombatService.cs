@@ -31,6 +31,10 @@ public sealed class CombatService : IEventHandler, IDisposable
     private readonly Dictionary<string, int> _killsByFaction = [];
     private readonly List<CombatKillRecord> _killLog = [];
 
+    // Track recent targets for rank correlation in wing/squad scenarios
+    private const int MaxRecentTargets = 20;
+    private readonly List<RecentTargetInfo> _recentTargets = [];
+
     private bool _isLoading;
     private DateTime _lastSaveRequest = DateTime.MinValue;
     private readonly TimeSpan _saveDebounceDelay = TimeSpan.FromMilliseconds(500);
@@ -59,6 +63,7 @@ public sealed class CombatService : IEventHandler, IDisposable
             case InterdictedEvent interdicted:  HandleInterdicted(interdicted); break;
             case EscapeInterdictionEvent esc:   HandleEscapeInterdiction(esc);  break;
             case HullDamageEvent hull:          HandleHullDamage(hull);         break;
+            case ShipTargetedEvent targeted:    HandleShipTargeted(targeted);   break;
         }
     }
 
@@ -176,14 +181,19 @@ public sealed class CombatService : IEventHandler, IDisposable
         if (!string.IsNullOrEmpty(evt.VictimFaction))
             IncrementFactionKills(evt.VictimFaction);
 
+        // Try to find matching target from recent targets
+        var matchedTarget = FindMatchingTarget(evt);
+
         var record = new CombatKillRecord
         {
-            Timestamp     = evt.Timestamp,
-            Target        = evt.Target_Localised.Length > 0 ? evt.Target_Localised : evt.Target,
-            VictimFaction = evt.VictimFaction,
-            IsPvp         = false,
-            CreditsEarned = evt.TotalReward ?? 0,
-            KillType      = "Bounty",
+            Timestamp        = evt.Timestamp,
+            Target           = evt.Target_Localised.Length > 0 ? evt.Target_Localised : evt.Target,
+            VictimFaction    = evt.VictimFaction,
+            IsPvp            = false,
+            CreditsEarned    = evt.TotalReward ?? 0,
+            KillType         = "Bounty",
+            PilotName        = matchedTarget?.PilotName,
+            VictimPilotRank  = matchedTarget?.PilotRank,
         };
 
         AddKillRecord(record);
@@ -306,7 +316,59 @@ public sealed class CombatService : IEventHandler, IDisposable
         }
     }
 
+    private void HandleShipTargeted(ShipTargetedEvent evt)
+    {
+        // Store recent target info for correlation with future bounty events
+        if (evt.TargetLocked && !string.IsNullOrEmpty(evt.Ship))
+        {
+            var targetInfo = new RecentTargetInfo
+            {
+                Timestamp = evt.Timestamp,
+                PilotName = !string.IsNullOrEmpty(evt.PilotName_Localised) 
+                    ? evt.PilotName_Localised 
+                    : evt.PilotName,
+                PilotRank = evt.PilotRank,
+                Ship = !string.IsNullOrEmpty(evt.Ship_Localised) 
+                    ? evt.Ship_Localised 
+                    : evt.Ship,
+                Faction = evt.Faction,
+                Bounty = evt.Bounty ?? 0,
+            };
+
+            _recentTargets.Insert(0, targetInfo);
+
+            // Keep buffer at max size
+            if (_recentTargets.Count > MaxRecentTargets)
+                _recentTargets.RemoveRange(MaxRecentTargets, _recentTargets.Count - MaxRecentTargets);
+        }
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private RecentTargetInfo? FindMatchingTarget(BountyEvent evt)
+    {
+        // Match recent targets by faction, ship type, and bounty amount
+        // Bounty received might be partial in wing/squad, so check if it's <= potential bounty
+        var targetShip = evt.Target_Localised.Length > 0 ? evt.Target_Localised : evt.Target;
+        var bountyReceived = evt.TotalReward ?? 0;
+
+        // Look through recent targets (most recent first)
+        foreach (var target in _recentTargets)
+        {
+            // Check if this target matches the bounty event
+            bool factionMatch = string.Equals(target.Faction, evt.VictimFaction, StringComparison.OrdinalIgnoreCase);
+            bool shipMatch = string.Equals(target.Ship, targetShip, StringComparison.OrdinalIgnoreCase);
+            bool bountyValid = target.Bounty == 0 || bountyReceived <= target.Bounty;
+            bool recentEnough = (evt.Timestamp - target.Timestamp).TotalSeconds < 30; // Within 30 seconds
+
+            if (factionMatch && shipMatch && bountyValid && recentEnough)
+            {
+                return target;
+            }
+        }
+
+        return null; // No matching target found
+    }
 
     private void IncrementFactionKills(string faction)
     {
@@ -316,6 +378,19 @@ public sealed class CombatService : IEventHandler, IDisposable
 
     private void AddKillRecord(CombatKillRecord record)
     {
+        // Check for duplicates within the last 5 seconds with same target and kill type
+        var isDuplicate = _killLog.Any(existing =>
+            Math.Abs((existing.Timestamp - record.Timestamp).TotalSeconds) < 5 &&
+            existing.Target == record.Target &&
+            existing.KillType == record.KillType &&
+            existing.CreditsEarned == record.CreditsEarned);
+
+        if (isDuplicate)
+        {
+            System.Diagnostics.Debug.WriteLine($"[CombatService] Duplicate kill log entry detected and skipped: {record.Target} at {record.Timestamp:HH:mm:ss}");
+            return;
+        }
+
         _killLog.Insert(0, record);
 
         if (_killLog.Count > MaxKillLogEntries)
@@ -328,6 +403,21 @@ public sealed class CombatService : IEventHandler, IDisposable
     {
         if (_dataService is IDisposable d) d.Dispose();
     }
+}
+
+// ── Helper classes ────────────────────────────────────────────────────────────
+
+/// <summary>
+/// Tracks recent ship targets for correlation with bounty/bond events
+/// </summary>
+internal class RecentTargetInfo
+{
+    public DateTime Timestamp { get; set; }
+    public string PilotName { get; set; } = string.Empty;
+    public string PilotRank { get; set; } = string.Empty;
+    public string Ship { get; set; } = string.Empty;
+    public string Faction { get; set; } = string.Empty;
+    public int Bounty { get; set; }
 }
 
 // ── Event args ────────────────────────────────────────────────────────────────
@@ -346,3 +436,5 @@ public class CombatDataLoadedEventArgs(CombatStateModel state) : EventArgs
 {
     public CombatStateModel State { get; } = state;
 }
+
+

@@ -90,4 +90,22 @@ public static class CombatRankHelper
         if (rank >= 8) return "Elite";
         return RankNames[rank + 1];
     }
+
+    /// <summary>
+    /// Converts a rank name string to its integer rank value.
+    /// </summary>
+    /// <param name="rankName">The rank name (e.g., "Competent", "Elite").</param>
+    /// <returns>The rank integer (0-8), or null if not found.</returns>
+    public static int? GetRankFromName(string? rankName)
+    {
+        if (string.IsNullOrWhiteSpace(rankName)) return null;
+
+        for (int i = 0; i < RankNames.Length; i++)
+        {
+            if (string.Equals(RankNames[i], rankName, StringComparison.OrdinalIgnoreCase))
+                return i;
+        }
+
+        return null;
+    }
 }

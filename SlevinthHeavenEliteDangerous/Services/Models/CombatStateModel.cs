@@ -31,11 +31,17 @@ public class CombatKillRecord
     /// <summary>Ship type for NPC kills; victim pilot name for PVP kills</summary>
     public string Target { get; set; } = string.Empty;
 
+    /// <summary>Pilot name from ShipTargetedEvent (NPC) or PVPKillEvent</summary>
+    public string? PilotName { get; set; }
+
     public string VictimFaction { get; set; } = string.Empty;
     public bool IsPvp { get; set; }
 
     /// <summary>Victim combat rank integer — populated for PVP kills only</summary>
     public int? VictimCombatRank { get; set; }
+
+    /// <summary>Victim pilot rank string (e.g. "Competent", "Elite") — populated from ShipTargeted for NPC kills</summary>
+    public string? VictimPilotRank { get; set; }
 
     public long CreditsEarned { get; set; }
 
