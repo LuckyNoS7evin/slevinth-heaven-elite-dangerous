@@ -40,10 +40,13 @@ public sealed class CommanderStatsService : IEventHandler
 
     private void HandleStatisticsEvent(StatisticsEvent evt)
     {
+        var previousWalletBalance = _stats.WalletBalance;
+
         _stats = new CommanderStatsModel
         {
             // Bank Account
             CurrentWealth      = evt.BankAccount?.CurrentWealth ?? 0,
+            WalletBalance      = previousWalletBalance,
             OwnedShipCount     = evt.BankAccount?.OwnedShipCount ?? 0,
 
             // Exploration
